@@ -2,6 +2,7 @@ const express = require("express");
 const api_helper = require("./apiHelper");
 const cors = require("cors");
 require("dotenv").config();
+import { data } from "./data.js";
 
 const app = express();
 
@@ -11,7 +12,8 @@ const api_key = process.env.PK_KEY;
 const baseUrl = `https://cloud.iexapis.com/`;
 const stocksUrl = `https://cloud.iexapis.com/stable/ref-data/symbols/?token=pk_77ef1294a9fd4bfeb1523b52629328e1`;
 
-const symbols = ["AAPL", "META", "GOOGL", "TSLA"];
+// const symbols = dataSymbols;
+
 const quotes = `https://cloud.iexapis.com/v1/stock/market/batch?symbols=${symbols
   .toString()
   .toLowerCase()}&types=quote&token=${api_key}`;
