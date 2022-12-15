@@ -1,11 +1,21 @@
-export function make_API_call(url) {
-  return new Promise((resolve, reject) => {
-    request(url, { json: true }, (err, res, body) => {
-      if (err) reject(err);
-      resolve(body);
+// const ex = require("request");
+const express = require("express");
+
+module.exports = {
+  /*
+   ** This method returns a promise
+   ** which gets resolved or rejected based
+   ** on the result from the API
+   */
+  make_API_call: function (url) {
+    return new Promise((resolve, reject) => {
+      express.get(url, { json: true }, (err, res, body) => {
+        if (err) reject(err);
+        resolve(body);
+      });
     });
-  });
-}
+  },
+};
 
 // All symbols
 // https://cloud.iexapis.com/beta/ref-data/symbols?token=pk_77ef1294a9fd4bfeb1523b52629328e1
