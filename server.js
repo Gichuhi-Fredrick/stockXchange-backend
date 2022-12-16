@@ -14,7 +14,12 @@ const PORT = 4000;
 const api_key = process.env.PK_KEY;
 
 const apiPath =
-  "https://cloud.iexapis.com/v1/stock/market/batch?&types=quote&symbols=aapl,fb,tsla&token=pk_77ef1294a9fd4bfeb1523b52629328e1";
+  "https://cloud.iexapis.com/v1/stock/market/batch?&types=quote&symbols=aapl,fb,tsla&token=${api_key}";
+
+const intraday = `https://cloud.iexapis.com/stable/stock/aapl/intraday-prices?token=${api_key}
+`;
+
+const history = `https://cloud.iexapis.com/stable/stock/TWTR/chart/date/20221010?token=${api_key} `;
 
 async function getData(url) {
   try {
@@ -31,4 +36,21 @@ app.get("/stocks", async (req, res) => {
   res.status(200).send(data);
 });
 
+app.get("/intraday", async (req, res) => {
+  const data = await getData(apiPath);
+  res.status(200).send(data);
+});
+
+app.get("/hitorical", async (req, res) => {
+  const data = await getData(apiPath);
+  res.status(200).send(data);
+});
+
 app.listen(PORT, () => console.log(`Live in this ${PORT}`));
+
+// https://iexcloud.io/blog/video-tutorial-how-to-get-started-with-the-iex-cloud-api
+// The current dayʼs minute-by-minute stock prices, using free IEX data:
+// https://cloud.iexapis.com/stable/stock/TWTR/chart/date/20200601?token=${api_key}
+
+// Historical data
+// https://cloud.iexapis.com/stable/stock/TWTR/chart/date/20221010?token=${api_key}
