@@ -1,8 +1,9 @@
 import express from "express";
 import axios from "axios";
 import cors from "cors";
-import * as dotenv from "dotenv";
-import { data } from "./data.js";
+// config.js
+import dotenv from "dotenv";
+dotenv.config({ silent: process.env.NODE_ENV === "production" });
 
 const app = express();
 
@@ -12,14 +13,15 @@ app.use(express.urlencoded({ extended: true }));
 
 const PORT = 4000;
 const api_key = process.env.PK_KEY;
+const st_key = process.env.ST_KEY;
 
 const apiPath =
-  "https://cloud.iexapis.com/v1/stock/market/batch?&types=quote&symbols=aapl,fb,tsla&token=${api_key}";
+  "https://cloud.iexapis.com/v1/stock/market/batch?&types=quote&symbols=aapl,fb,tsla&token=pk_77ef1294a9fd4bfeb1523b52629328e1";
 
 const intraday = `https://cloud.iexapis.com/stable/stock/aapl/intraday-prices?token=${api_key}
 `;
 
-const history = `https://cloud.iexapis.com/stable/stock/TWTR/chart/date/20221010?token=${api_key} `;
+const history = `https://cloud.iexapis.com/v1/stock/AAPL/chart/1m?token=pk_77ef1294a9fd4bfeb1523b52629328e1`;
 
 async function getData(url) {
   try {
@@ -41,8 +43,10 @@ app.get("/intraday", async (req, res) => {
   res.status(200).send(data);
 });
 
-app.get("/hitorical", async (req, res) => {
-  const data = await getData(apiPath);
+app.get("/historical", async (req, res) => {
+  const data = await getData(history);
+  console.log(data);
+  // can't send a response to client side
   res.status(200).send(data);
 });
 
