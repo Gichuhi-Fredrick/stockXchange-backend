@@ -60,8 +60,13 @@ function getDisplaySymbol(data) {
 
 app.get("/stocks", async (req, res) => {
   const data = await fetchSymbols(apiPath);
+  const mappedData = Object.values(
+    data.map((d) => {
+      return d.open !== null ? [d.open, d.high, d.low, d.close] : undefined;
+    })
+  );
   // console.log(data);
-  res.status(200).send(data ? data : []);
+  res.status(200).send(mappedData ? mappedData : []);
 });
 
 app.get("/forex", async (req, res) => {
