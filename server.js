@@ -14,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT;
 const API_KEY = process.env.PK_KEY;
 const FH_KEY = process.env.FH_KEY;
+const AV_KEY = process.env.AV_KEY;
 
 const api_key = finnhub.ApiClient.instance.authentications["api_key"];
 api_key.apiKey = FH_KEY;
@@ -21,6 +22,8 @@ api_key.apiKey = FH_KEY;
 const apiPath = `https://cloud.iexapis.com/v1/stock/market/batch?&types=quote&symbols=aapl,fb,tsla?token=${API_KEY}`;
 const history = `https://cloud.iexapis.com/v1/stock/AAPL/chart/1m?token=${API_KEY}`;
 const urlForex = `https://finnhub.io/api/v1/forex/symbol?exchange=oanda&token=cegligiad3i0qis37ar0cegligiad3i0qis37arg`;
+const fxDaily = `https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=EUR&to_symbol=USD&apikey=${AV_KEY}`;
+const cryptoCurrency = `https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=BTC&market=CNY&apikey=${AV_KEY}`;
 
 async function getData(url) {
   try {
@@ -78,7 +81,22 @@ app.get("/forex", async (req, res) => {
   });
 });
 
-// Get historical data
+// Forex Daily time series
+// TODO
+// use the currency pairs from forex to query data in this api call
+app.get("/fx_daily", async (req, res) => {
+  const data = await getData(fxDaily);
+  // console.log(data);
+  res.status(200).send(data);
+});
+
+app.get("/crypto", async (req, res) => {
+  const data = await getData(cryptoCurrency);
+  // console.log(data);
+  res.status(200).send(data);
+});
+
+// Get historical data for stocks
 app.get("/historical", async (req, res) => {
   const data = await getData(history);
   // console.log(data);
