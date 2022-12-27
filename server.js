@@ -24,6 +24,7 @@ const history = `https://cloud.iexapis.com/v1/stock/AAPL/chart/1m?token=${API_KE
 const urlForex = `https://finnhub.io/api/v1/forex/symbol?exchange=oanda&token=cegligiad3i0qis37ar0cegligiad3i0qis37arg`;
 const fxDaily = `https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=EUR&to_symbol=USD&apikey=${AV_KEY}`;
 const cryptoCurrency = `https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=BTC&market=CNY&apikey=${AV_KEY}`;
+const newsUrl = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=COIN,CRYPTO:BTC,FOREX:USD&time_from=20220410T0130&limit=200&apikey=AV_KEY`;
 
 async function getData(url) {
   try {
@@ -63,13 +64,14 @@ function getDisplaySymbol(data) {
 
 app.get("/stocks", async (req, res) => {
   const data = await fetchSymbols(apiPath);
-  const mappedData = Object.values(
-    data.map((d) => {
-      return d.open !== null ? [d.open, d.high, d.low, d.close] : undefined;
-    })
-  );
+  // console.log(data[0]);
+  // const mappedData = Object.values(
+  //   data.map((d) => {
+  //     return d.open !== null ? [d.open, d.high, d.low, d.close] : undefined;
+  //   })
+  // );
   // console.log(data);
-  res.status(200).send(mappedData ? mappedData : []);
+  res.status(200).send(data ? data : []);
 });
 
 app.get("/forex", async (req, res) => {
@@ -97,8 +99,16 @@ app.get("/crypto", async (req, res) => {
 });
 
 // Get historical data for stocks
+// Call api per user query or set default data to be displayed
 app.get("/historical", async (req, res) => {
   const data = await getData(history);
+  // console.log(data);
+  res.status(200).send(data);
+});
+
+// Get news data for stocks
+app.get("/news", async (req, res) => {
+  const data = await getData(newsUrl);
   // console.log(data);
   res.status(200).send(data);
 });
