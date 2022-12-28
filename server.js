@@ -60,6 +60,22 @@ async function fetchSymbols(url) {
   }
 }
 
+async function getForexList(url, apiKey) {
+  try {
+    const response = await axios.get(url, {
+      params: {
+        type: "forex",
+        access_key: apiKey,
+      },
+    });
+    const data = await response.data;
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 // extract forex currencies from the data returned
 function getDisplaySymbol(data) {
   return data.map(function (item) {
@@ -80,9 +96,7 @@ app.get("/stocks", async (req, res) => {
 });
 
 app.get("/forex", async (req, res) => {
-  const data = await fetchSymbols(
-    "https://fcsapi.com/api-v3/forex/history?symbol=EUR/USD&period=1h&access_key=ww22XgaGZAg1DsvPXsqRBa6N"
-  );
+  const data = await getForexList(forexSymbols, FCS_KEY);
   // const finnhubClient = new finnhub.DefaultApi();
 
   // finnhubClient.forexSymbols("OANDA", (error, data, response) => {
