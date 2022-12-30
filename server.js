@@ -24,12 +24,15 @@ const FCS_KEY = process.env.FCS_KEY;
 const stocksUrl = `https://cloud.iexapis.com/v1/stock/market/batch?&types=quote&symbols=aapl,fb,tsla?token=${API_KEY}`;
 
 // stocks history change 1m(1month) to call more data
-const stocksHistory = `https://cloud.iexapis.com/v1/stock/AMD/chart/1m?token=${API_KEY}`;
+const stocksHistory = `https://cloud.iexapis.com/v1/stock/NFLX/chart/1m?token=${API_KEY}`;
+
 // symbols
 // const urlForex = `https://finnhub.io/api/v1/forex/symbol?exchange=oanda&token=cegligiad3i0qis37ar0cegligiad3i0qis37arg`;
 
 // historical data for forex
 const fxDaily = `https://www.alphavantage.co/query?function=FX_DAILY&from_symbol=EUR&to_symbol=USD&apikey=${AV_KEY}`;
+
+// crypto
 const cryptoCurrency = `https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=BTC&market=CNY&apikey=${AV_KEY}`;
 // alternative fx historical data
 // `https://fcsapi.com/api-v3/forex/history?symbol=EUR/USD&period=1d&from=2022-06-01T12:00&to=2022-12-27T12:00&access_key=ww22XgaGZAg1DsvPXsqRBa6N`;
@@ -39,6 +42,26 @@ const newsUrl = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&ticke
 
 // Currencies
 const forexSymbols = `https://fcsapi.com/api-v3/forex/latest?symbol=all_forex&access_key=${FCS_KEY}`;
+
+const finnhub = require("finnhub");
+
+const api_key = finnhub.ApiClient.instance.authentications["api_key"];
+api_key.apiKey = "cegligiad3i0qis37ar0cegligiad3i0qis37arg";
+const finnhubClient = new finnhub.DefaultApi();
+
+finnhubClient.forexSymbols("OANDA", (error, data, response) => {
+  console.log(data);
+});
+
+finnhubClient.forexCandles(
+  "OANDA:EUR_USD",
+  "D",
+  1590988249,
+  1591852249,
+  (error, data, response) => {
+    console.log(data);
+  }
+);
 
 async function getData(url) {
   try {
