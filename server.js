@@ -21,7 +21,8 @@ const FCS_KEY = process.env.FCS_KEY;
 // const api_key = finnhub.ApiClient.instance.authentications["api_key"];
 // api_key.apiKey = FH_KEY;
 
-const stocksUrl = `https://cloud.iexapis.com/v1/stock/market/batch?&types=quote&symbols=aapl,fb,tsla?token=${API_KEY}`;
+const stocksUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=IBM&interval=60min&apikey=${AV_KEY}`;
+// `https://cloud.iexapis.com/v1/stock/market/batch?&types=quote&symbols=aapl,fb,tsla?token=${API_KEY}`;
 
 // stocks history change 1m(1month) to call more data
 const stocksHistory = `https://cloud.iexapis.com/v1/stock/NFLX/chart/1m?token=${API_KEY}`;
@@ -40,28 +41,11 @@ const cryptoCurrency = `https://www.alphavantage.co/query?function=DIGITAL_CURRE
 // news
 const newsUrl = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&tickers=COIN,CRYPTO:BTC,FOREX:USD&time_from=20220410T0130&limit=200&?apikey=AV_KEY`;
 
+// The current dayʼs minute-by-minute stock prices, using free IEX data:
+// const uri = `https://cloud.iexapis.com/stable/stock/TWTR/chart/date/20200601?token=${api_key}`;
+
 // Currencies
 const forexSymbols = `https://fcsapi.com/api-v3/forex/latest?symbol=all_forex&access_key=${FCS_KEY}`;
-
-const finnhub = require("finnhub");
-
-const api_key = finnhub.ApiClient.instance.authentications["api_key"];
-api_key.apiKey = "cegligiad3i0qis37ar0cegligiad3i0qis37arg";
-const finnhubClient = new finnhub.DefaultApi();
-
-finnhubClient.forexSymbols("OANDA", (error, data, response) => {
-  console.log(data);
-});
-
-finnhubClient.forexCandles(
-  "OANDA:EUR_USD",
-  "D",
-  1590988249,
-  1591852249,
-  (error, data, response) => {
-    console.log(data);
-  }
-);
 
 async function getData(url) {
   try {
@@ -104,7 +88,7 @@ async function fetchData(url) {
 
 // Extract forex Date open high low close
 function extractData(data) {
-  const timeSeries = data["Time Series FX (Daily)"];
+  const timeSeries = data["Time Series"];
   const result = [];
 
   for (const date in timeSeries) {
@@ -121,6 +105,27 @@ function extractData(data) {
 
   return result;
 }
+
+// extract data from alphavanted api endpoints
+const extract = (newData) => {
+  const dataOHLC = [];
+
+  // const newData = Object.values(data)[1];
+  for (const data in newData) {
+    // Convert the date to a number
+    const dateAsNumber = Date.parse(data);
+
+    // // Get the open, high, low, and close prices for the date
+    const open = parseFloat(data[data]["1. open"]);
+    const high = parseFloat(data[data]["2. high"]);
+    const low = parseFloat(data[data]["3. low"]);
+    const close = parseFloat(data[data]["4. close"]);
+
+    // Add the date, open, high, low, and close prices to the prices array
+    dataOHLC.push([dateAsNumber, open, high, low, close]);
+  }
+  return dataOHLC;
+};
 
 // extract forex currencies from the data returned
 function getDisplaySymbol(data) {
@@ -143,9 +148,11 @@ app.get("/stocks", async (req, res) => {
 
 app.get("/forex", async (req, res) => {
   const data = await fetchData(fxDaily);
-  let dateOHLC = extractData(data);
+  const newData = Object.values(data)[1];
+  console.log(newData);
+  // let dataOHLC = extract(newData);
 
-  res.status(200).send(dateOHLC);
+  res.status(200).send({});
 });
 
 // Forex Daily time series
@@ -165,15 +172,9 @@ app.get("/crypto", async (req, res) => {
 // Get historical data for stocks
 // Call api per user query or set default data to be displayed
 app.get("/historical", async (req, res) => {
-  const data = await getData(stocksHistory);
-  const mappedData = Object.values(
-    data.map((d) => {
-      return d.open !== null
-        ? [Date.parse(d.date), d.open, d.high, d.low, d.close]
-        : undefined;
-    })
-  );
-  res.status(200).send(mappedData);
+  const data = await getData(stocksUrl);
+  const dateOHLC = extractData(data);
+  res.status(200).send(dateOHLC);
 });
 
 // Get news data for stocks
@@ -183,9 +184,6 @@ app.get("/news", async (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`${PORT} is online`));
-
-// The current dayʼs minute-by-minute stock prices, using free IEX data:
-// https://cloud.iexapis.com/stable/stock/TWTR/chart/date/20200601?token=${api_key}
 
 // Historical data
 // https://cloud.iexapis.com/stable/stock/TWTR/chart/date/20221010?token=${api_key}
