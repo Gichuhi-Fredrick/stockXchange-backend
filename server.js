@@ -87,24 +87,54 @@ async function fetchData(url) {
 }
 
 // Extract forex Date open high low close
-function extractData(data) {
-  const timeSeries = data["Time Series"];
-  const result = [];
+// function extractData(data) {
+//   const timeSeries = data["Time Series"];
+//   const result = [];
 
-  for (const date in timeSeries) {
-    const values = timeSeries[date];
+//   for (const date in timeSeries) {
+//     const values = timeSeries[date];
+//     result.push([
+//       Date.parse(date),
+//       // + to convert strings to numbers/floats
+//       +values["1. open"],
+//       +values["2. high"],
+//       +values["3. low"],
+//       +values["4. close"],
+//     ]);
+//   }
+
+//   return result;
+// }
+
+const extractData = (data) => {
+  const result = [];
+  for (const date in data) {
+    const entry = data[date];
     result.push([
-      Date.parse(date),
-      // + to convert strings to numbers/floats
-      +values["1. open"],
-      +values["2. high"],
-      +values["3. low"],
-      +values["4. close"],
+      new Date(date).getTime(),
+      Number(entry["1. open"]),
+      Number(entry["2. high"]),
+      Number(entry["3. low"]),
+      Number(entry["4. close"]),
     ]);
   }
-
   return result;
-}
+};
+
+// const extractData = (data) => {
+//   const result = [];
+//   for (const date in data) {
+//     const entry = data[date];
+//     result.push([
+//       new Date(date).getTime().toString(),
+//       entry["1. open"],
+//       entry["2. high"],
+//       entry["3. low"],
+//       entry["4. close"],
+//     ]);
+//   }
+//   return result;
+// };
 
 // extract data from alphavanted api endpoints
 const extract = (newData) => {
@@ -138,11 +168,7 @@ function getDisplaySymbol(data) {
 //  Cache the data not to exceed 10x
 app.get("/stocks", async (req, res) => {
   const data = await fetchData(stocksUrl);
-  // const mappedData = Object.values(
-  //   data.map((d) => {
-  //     return d.open !== null ? [ Date.parse(d.date),d.open, d.high, d.low, d.close] : undefined;
-  //   })
-  // );
+
   res.status(200).send(data);
 });
 
@@ -150,9 +176,9 @@ app.get("/forex", async (req, res) => {
   const data = await fetchData(fxDaily);
   const newData = Object.values(data)[1];
   console.log(newData);
-  // let dataOHLC = extract(newData);
+  const dataOHLC = extractData(newData);
 
-  res.status(200).send({});
+  res.status(200).send(dataOHLC);
 });
 
 // Forex Daily time series
@@ -173,8 +199,11 @@ app.get("/crypto", async (req, res) => {
 // Call api per user query or set default data to be displayed
 app.get("/historical", async (req, res) => {
   const data = await getData(stocksUrl);
-  const dateOHLC = extractData(data);
-  res.status(200).send(dateOHLC);
+  console.log(data);
+  const newData = Object.values(data)[1];
+  const dataOHLC = extractData(newData);
+  // console.log(dataOHLC);
+  res.status(200).json(dataOHLC);
 });
 
 // Get news data for stocks
